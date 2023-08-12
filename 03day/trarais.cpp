@@ -55,6 +55,7 @@ namespace TraiarsFixedTraits
     {
         using type = int;
     };
+
     template <typename T>
     auto func2(T *begin, T *end)
     {
@@ -124,7 +125,7 @@ namespace TraiarsFixedTraits
 
 
 // 退化技术的演示
-namespace TraiarsClear
+namespace TraiarsDecay
 {
     template <typename T>
     struct clearConst
@@ -157,6 +158,33 @@ namespace TraiarsClear
         using type = T;
     };
 
+    template <class T1>
+    struct myDecay : clearReference<clearConst<T1>>::type
+    {
+    };
+
+    // 数组转化为指针
+    template <typename T, size_t size>
+    struct myDecay<T[size]>
+    {
+        using type = T*;
+        /* data */
+    };
+
+    //函数转化为指针
+    template <typename T, class...args>
+    struct myDecay<T(args...)>
+    {
+        using type = T(*)(args...);
+        /* data */
+    };
+
+    int func1(int a, int b)
+    {
+        cout << "func1--" << a << "---" << b << endl;
+        return a + b;
+    }
+
     void test()
     {
         int a = 123;
@@ -166,21 +194,49 @@ namespace TraiarsClear
         const int &e = b;
 
         // 去掉const
-        cout << is_same<TraiarsClear::clearConst<decltype(b)>::type, int>::value << endl;
+        cout << is_same<clearConst<decltype(b)>::type, int>::value << endl;
 
         // 去掉引用
-        cout << is_same<TraiarsClear::clearReference<decltype(c)>::type, int>::value << endl;
-        cout << is_same<TraiarsClear::clearReference<decltype(d)>::type, int>::value << endl;
+        cout << is_same<clearReference<decltype(c)>::type, int>::value << endl;
+        cout << is_same<clearReference<decltype(d)>::type, int>::value << endl;
 
         cout << endl;
 
         // 组合--得先去掉引用，再去掉const
-        cout << is_same<TraiarsClear::clearConst<TraiarsClear::clearReference<decltype(e)>::type>::type, int>::value << endl;
-    }
-} // namespace TraiarsClear
+        cout << is_same<clearConst<clearReference<decltype(e)>::type>::type, int>::value << endl;
 
+        int f[4]{};
+        const int g[5]{};
+
+        cout << abi::__cxa_demangle(typeid(decltype(d)).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(decay<decltype(d)>::type).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(myDecay<decltype(d)>::type).name(), 0, 0, 0) << endl;
+
+        cout << "----------------" << endl;
+
+        cout << abi::__cxa_demangle(typeid(decltype(e)).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(decay<decltype(e)>::type).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(myDecay<decltype(e)>::type).name(), 0, 0, 0) << endl;
+
+        cout << "----------------" << endl;
+        cout << abi::__cxa_demangle(typeid(decltype(f)).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(decay<decltype(f)>::type).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(myDecay<decltype(f)>::type).name(), 0, 0, 0) << endl;
+
+        cout << "----------------" << endl;
+        cout << abi::__cxa_demangle(typeid(decltype(g)).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(decay<decltype(g)>::type).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(myDecay<decltype(g)>::type).name(), 0, 0, 0) << endl;
+        cout << "----------------" << endl;
+
+        cout << abi::__cxa_demangle(typeid(decltype(func1)).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(decay<decltype(func1)>::type).name(), 0, 0, 0) << endl;
+        cout << abi::__cxa_demangle(typeid(myDecay<decltype(func1)>::type).name(), 0, 0, 0) << endl;
+    }
+} // namespace TraiarsDecay
 
 int main()
 {
-    TraiarsFixedTraits::test();
+    // TraiarsFixedTraits::test();
+    TraiarsDecay::test();
 }
