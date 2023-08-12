@@ -168,7 +168,6 @@ namespace TraiarsDecay
     struct myDecay<T[size]>
     {
         using type = T*;
-        /* data */
     };
 
     //函数转化为指针
@@ -176,7 +175,6 @@ namespace TraiarsDecay
     struct myDecay<T(args...)>
     {
         using type = T(*)(args...);
-        /* data */
     };
 
     int func1(int a, int b)
@@ -235,8 +233,115 @@ namespace TraiarsDecay
     }
 } // namespace TraiarsDecay
 
+// 值萃取
+namespace TraiarsValueTraits
+{
+    class C1
+    {
+    private:
+        /* data */
+        int m_a;
+        int m_b;
+
+    public:
+        explicit C1(const int &a = 0, const int &b = 0) : m_a(a), m_b(b){};
+        int GetA() const
+        {
+            return m_a;
+        }
+        int GetB() const
+        {
+            return m_b;
+        }
+        ~C1(){};
+
+        C1 &operator+=(const C1 &c)
+        {
+            m_a += c.m_a;
+            m_b += c.m_b;
+            return *this;
+        }
+
+        friend ostream &operator<<(ostream &os, const C1 &c)
+        {
+            os << c.GetA() << " -- " << c.GetB() << endl;
+            return os;
+        }
+    };
+
+    template <typename T>
+    struct SumType
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    T func2(T *begin, T *end)
+    {
+        T Sum{};
+        for (;;)
+        {
+            Sum += *begin;
+            if (begin == end)
+            {
+                break;
+            }
+            begin++;
+        }
+        return Sum;
+    }
+
+    void test()
+    {
+        C1 d[]{C1(1, 11), C1(2, 22), C1(3, 33)};
+        cout << func2<C1>(&d[0], &d[2]);
+    }
+
+} // namespace TraiarsValueTraits
+
+// 类型萃取
+namespace TraiarsTypedTraits
+{
+    template <class T1, class T2>
+    struct myIsSame
+    {
+        using type = bool;
+        static const type value = false;
+    };
+
+    template <class T1>
+    struct myIsSame<T1, T1>
+    {
+        using type = bool;
+        static const type value = true;
+    };
+
+    int func1()
+    {
+
+        int a = 123;
+        int b = 456;
+        double c = 7.89;
+
+        const int e = 789;
+
+        cout << is_same<decltype(a), decltype(b)>::value << endl;
+        cout << is_same<decltype(a), decltype(c)>::value << endl;
+        cout << endl;
+
+        cout << myIsSame<decltype(a), decltype(b)>::value << endl;
+        cout << myIsSame<decltype(a), decltype(c)>::value << endl;
+
+        return 0;
+    }
+} // namespace TraiarsTypedTraits
+
+
+
 int main()
 {
     // TraiarsFixedTraits::test();
-    TraiarsDecay::test();
+    // TraiarsDecay::test();
+    // TraiarsValueTraits::test();
+    TraiarsTypedTraits::func1();
 }

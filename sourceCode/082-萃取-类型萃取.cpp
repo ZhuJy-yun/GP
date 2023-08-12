@@ -1,5 +1,5 @@
 #include <iostream>
-#include<string>
+#include <string>
 using namespace std;
 
 /*
@@ -15,34 +15,35 @@ using namespace std;
  *
  * */
 
-
-template<class T1,class T2>
-struct myIsSame{
+template <class T1, class T2>
+struct myIsSame
+{
     using type = bool;
-    static const type value=false;
+    static const type value = false;
 };
 
-template<class T1>
-struct myIsSame<T1,T1>{
+template <class T1>
+struct myIsSame<T1, T1>
+{
     using type = bool;
-    static const type value=true;
+    static const type value = true;
 };
 
+int main()
+{
 
-int main(){
+    int a = 123;
+    int b = 456;
+    double c = 7.89;
 
-    int a=123;
-    int b=456;
-    double c=7.89;
+    const int e = 789;
 
-    const int e=789;
+    cout << is_same<decltype(a), decltype(b)>::value << endl;
+    cout << is_same<decltype(a), decltype(c)>::value << endl;
+    cout << endl;
 
-    cout<<is_same<decltype(a), decltype(b)>::value<<endl;
-    cout<<is_same<decltype(a), decltype(c)>::value<<endl;
-    cout<<endl;
-
-    cout<<myIsSame<decltype(a), decltype(b)>::value<<endl;
-    cout<<myIsSame<decltype(a), decltype(c)>::value<<endl;
+    cout << myIsSame<decltype(a), decltype(b)>::value << endl;
+    cout << myIsSame<decltype(a), decltype(c)>::value << endl;
     /*
     cout<<is_const<decltype(a)>::value<<endl;
     cout<<is_const<decltype(e)>::value<<endl;
